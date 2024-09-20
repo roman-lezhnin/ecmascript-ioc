@@ -6,7 +6,6 @@ export class Container {
    * Map to store component constructors keyed by their names.
    */
   private static components = new Map<string, ComponentConstructor<unknown>>();
-
   /**
    * Map to store singleton instances of components.
    */
@@ -59,9 +58,29 @@ export class Container {
   private static injectDependencies(instance: DependencyAware): void {
     const dependencies = instance.__dependencies__;
     if (dependencies) {
-      for (const [propertyKey, depName] of Object.entries(dependencies)) {
-        (instance as Record<string | symbol, unknown>)[propertyKey] =
-          this.get(depName);
+      for (const [contextName, dependencyName] of Object.entries(
+        dependencies
+      )) {
+        /**
+         * Lazy Initialization:
+         * The actual dependency is not resolved until the property is accessed.
+         * Once accessed, the property is redefined to cache the resolved dependency.
+         */
+        Object.defineProperty(instance, contextName, {
+          configurable: true,
+          enumerable: true,
+          get: function () {
+            const value = Container.get(dependencyName);
+            // Cache the resolved dependency
+            Object.defineProperty(this, contextName, {
+              value,
+              writable: true,
+              configurable: true,
+              enumerable: true,
+            });
+            return value;
+          },
+        });
       }
     }
   }
