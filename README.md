@@ -1,23 +1,23 @@
-# ts-spring-di
+# ecmascript-ioc
 
-A TypeScript Dependency Injection library mirroring Java Spring Framework's DI mechanism.
+An IoC library mirroring Java Spring Framework's implementation.
 
 ## Features
 
-- **Annotations**: Use decorators like `@component`, `@repository()`, `@service`, `@controller`, and `@autowired`.
+- **Annotations**: Use decorators like `@component`, `@repository`, `@service`, `@controller`, and `@autowired`.
 - **Dependency Injection**: Automatic dependency resolution and injection.
 - **TypeScript 5.0 Decorators**: Uses the new ECMAScript decorators without `reflect-metadata`.
 
 ## Installation
 
 ```bash
-npm install ts-spring-di
+npm install ecmascript-ioc
 ```
 
 ## Usage guide
 
 ```TypeScript
-import { autowired, service, repository } from 'ts-spring-di';
+import { autowired, service, repository } from 'ecmascript-ioc';
 
 @repository("UserRepository")
 class UserRepository {
