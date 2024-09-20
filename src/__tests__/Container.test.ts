@@ -69,7 +69,7 @@ describe("Container", () => {
   });
 
   it("should lazy-initialize dependencies", () => {
-    @component("Lazy1")
+    @component("Lazy1", { lazy: true })
     class Lazy1 {
       static count = 0;
 
@@ -81,7 +81,7 @@ describe("Container", () => {
       }
     }
 
-    @component("Lazy2")
+    @component("Lazy2", { lazy: true })
     class Lazy2 {
       static count = 0;
 

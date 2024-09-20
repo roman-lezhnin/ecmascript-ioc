@@ -5,7 +5,7 @@ export class Container {
   /**
    * Map to store component constructors keyed by their names.
    */
-  private static components = new Map<string, ComponentConstructor<unknown>>();
+  private static components = new Map<string, RegisteredComponent>();
   /**
    * Map to store singleton instances of components.
    */
@@ -15,12 +15,17 @@ export class Container {
    * Registers a component with the container.
    * @param name - The name of the component.
    * @param constructor - The constructor function of the component.
+   * @param settings - The settings of the component: whether the component should be lazy-initialized.
    */
-  static register<T>(name: string, constructor: ComponentConstructor<T>): void {
+  static register<T>(
+    name: string,
+    constructor: ComponentConstructor<T>,
+    settings: ComponentSettings
+  ): void {
     if (this.components.has(name)) {
       throw new Error(`Component '${name}' is already registered.`);
     }
-    this.components.set(name, constructor as ComponentConstructor<unknown>);
+    this.components.set(name, { ...settings, constructor });
   }
 
   /**
@@ -33,12 +38,12 @@ export class Container {
       return this.instances.get(name) as T;
     }
 
-    const constructor = this.components.get(name) as ComponentConstructor<T>;
-    if (!constructor) {
+    const component = this.components.get(name);
+    if (!component) {
       throw new Error(`Component '${name}' not found.`);
     }
 
-    const instance = new constructor();
+    const instance = new component.constructor() as T;
     this.instances.set(name, instance);
     this.injectDependencies(instance as DependencyAware);
     return instance;
@@ -61,26 +66,36 @@ export class Container {
       for (const [contextName, dependencyName] of Object.entries(
         dependencies
       )) {
-        /**
-         * Lazy Initialization:
-         * The actual dependency is not resolved until the property is accessed.
-         * Once accessed, the property is redefined to cache the resolved dependency.
-         */
-        Object.defineProperty(instance, contextName, {
-          configurable: true,
-          enumerable: true,
-          get: function () {
-            const value = Container.get(dependencyName);
-            // Cache the resolved dependency
-            Object.defineProperty(this, contextName, {
-              value,
-              writable: true,
-              configurable: true,
-              enumerable: true,
-            });
-            return value;
-          },
-        });
+        const component = this.components.get(dependencyName);
+        if (!component) {
+          throw new Error(`Component '${dependencyName}' not found.`);
+        }
+        if (component.lazy) {
+          /**
+           * Lazy Initialization:
+           * The actual dependency is not resolved until the property is accessed.
+           * Once accessed, the property is redefined to cache the resolved dependency.
+           */
+          Object.defineProperty(instance, contextName, {
+            configurable: true,
+            enumerable: true,
+            get: function () {
+              const value = Container.get(dependencyName);
+              // Cache the resolved dependency
+              Object.defineProperty(this, contextName, {
+                value,
+                writable: true,
+                configurable: true,
+                enumerable: true,
+              });
+              return value;
+            },
+          });
+        } else {
+          // Eagerly Initialization:
+          const value = Container.get(dependencyName);
+          (instance as Record<string | symbol, unknown>)[contextName] = value;
+        }
       }
     }
   }
