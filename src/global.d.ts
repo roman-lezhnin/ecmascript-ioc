@@ -18,4 +18,6 @@ type RegisteredComponent = ComponentSettings & {
  */
 interface DependencyAware {
   __dependencies__?: Record<string | symbol, string>;
+  __postConstructMethods__?: string[];
+  [key: string]: Function;
 }

@@ -45,7 +45,10 @@ export class Container {
 
     const instance = new component.constructor() as T;
     this.instances.set(name, instance);
+
     this.injectDependencies(instance as DependencyAware);
+    this.callPostConstructMethods(instance as DependencyAware);
+
     return instance;
   }
 
@@ -95,6 +98,21 @@ export class Container {
           // Eagerly Initialization:
           const value = Container.get(dependencyName);
           (instance as Record<string | symbol, unknown>)[contextName] = value;
+        }
+      }
+    }
+  }
+
+  /**
+   * Calls methods decorated with @postConstruct after dependencies are injected.
+   * @param instance - The instance whose post-construct methods to call.
+   */
+  private static callPostConstructMethods(instance: DependencyAware): void {
+    const methods = instance.__postConstructMethods__;
+    if (Array.isArray(methods)) {
+      for (const methodName of methods) {
+        if (typeof instance[methodName] === "function") {
+          instance[methodName].call(instance);
         }
       }
     }

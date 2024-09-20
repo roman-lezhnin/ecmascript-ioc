@@ -17,7 +17,7 @@ npm install ecmascript-ioc
 ## Usage guide
 
 ```TypeScript
-import { autowired, component, service, repository } from 'ecmascript-ioc';
+import { autowired, component, service, repository, postConstruct } from 'ecmascript-ioc';
 
 @component("ReportGenerator", { lazy: true })
 class ReportGenerator {
@@ -34,6 +34,11 @@ class UsersRepository {
 
   public save(username: string): void {
     console.log(`Persist user: ${username}.`);
+  }
+
+  @postConstruct
+  private warmUpCache(): void {
+    console.log('Fetching data from DataBase...');
   }
 }
 
