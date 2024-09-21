@@ -63,3 +63,16 @@ class UsersService {
   }
 }
 ```
+
+## React.js hook
+
+```TypeScript
+import { useMemo } from "react";
+import { Container } from "ecmascript-ioc";
+
+export function useDependency<T>(dependencyName: string | symbol): T {
+  return useMemo(() => {
+    return Container.get<T>(dependencyName);
+  }, [dependencyName]);
+}
+```
