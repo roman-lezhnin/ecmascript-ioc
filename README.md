@@ -1,12 +1,13 @@
 # ecmascript-ioc
 
-An IoC library mirroring Java Spring Framework's implementation.
+This is a zero-dependency vanila TypeScript IoC library that mirrors the implementation of the Java Spring Framework IoC.
+You can use it anywhere: Node.js backend, Electron.js, IoT apps, React/ReactNative, Vue, Iframe embeded widgets, etc...
 
 ## Features
 
-- **Annotations**: Use decorators like `@component`, `@repository`, `@service`, `@controller`, and `@autowired`.
 - **Dependency Injection**: Automatic dependency resolution and injection with circular dependencies handling and lazy initializations.
-- **TypeScript 5.0 Decorators**: Uses the new ECMAScript decorators without `reflect-metadata`.
+- **Annotations**: Use decorators like `@component`, `@repository`, `@service`, `@controller`, and `@autowired`.
+- **New ECMAScript Decorators**: Use the native TypeScript5.0 decorators without `reflect-metadata`.
 
 ## Installation
 
@@ -14,26 +15,33 @@ An IoC library mirroring Java Spring Framework's implementation.
 npm install ecmascript-ioc
 ```
 
-## Usage guide
+## Usage guides
+
+### Backend Three-tier architecture example:
 
 ```TypeScript
-import { autowired, component, service, repository, postConstruct } from 'ecmascript-ioc';
+import { autowired,
+         component,
+         repository,
+         service,
+         controller,
+         postConstruct } from 'ecmascript-ioc';
 
-@component("ReportGenerator", { lazy: true })
+
+@component(ReportGenerator.di_token, { lazy: true })
 class ReportGenerator {
+  public static readonly di_token: symbol = Symbol.for("ReportGenerator");
+
   public generateTaxReport(username: string): void {
     console.log(`Prepare tax report for user: ${username}.`);
   }
 }
 
-@repository("UsersRepository")
-class UsersRepository {
-  public get(): string {
-    return "username";
-  }
 
-  public save(username: string): void {
-    console.log(`Persist user: ${username}.`);
+@repository("UsersRepository")
+class UsersRepository extends Repository {
+  public delete(username: string): void {
+    console.log(`Delete user: ${username} from DataBase.`);
   }
 
   @postConstruct
@@ -42,25 +50,83 @@ class UsersRepository {
   }
 }
 
+
 @service("UsersService")
-class UsersService {
+class UsersService implements Service {
   @autowired("UsersRepository")
-  private repository!: UsersRepository;
+  private readonly repository!: UsersRepository;
 
-  @autowired("ReportGenerator")
-  private reportGenerator!: ReportGenerator;
+  @autowired(ReportGenerator.di_token)
+  private readonly reportGenerator!: ReportGenerator;
 
-  public getUser(): string {
-    return this.repository.get();
-  }
-
-  public createUser(username: string): void {
-    this.repository.save(username);
-  }
-
-  private generateTaxReport(username: string): void {
+  public deleteUser(username: string): void {
+    this.repository.delete(username);
     this.reportGenerator.generateTaxReport(username);
   }
+}
+
+
+@controller("UsersController")
+class UsersController {
+  @autowired("UsersService")
+  private readonly service!: UsersService;
+
+  public deleteUser(req: Request, res: Response) {
+    this.service.deleteUser(req.query.username);
+  }
+}
+```
+
+### Frontend Three-tier architecture example:
+
+```TypeScript
+import React from "react";
+import { observable } from "mobx";
+import { AxiosInstance } from "axios";
+import { autowired, component, repository, service } from 'ecmascript-ioc';
+
+
+@component("RestHttpClient")
+export class RestHttpClient extends HttpClient {
+  protected readonly http: AxiosInstance;
+
+  public delete(url: string): void {
+    console.log(`RESTful: ${url}.`);
+  }
+}
+
+
+@repository("UsersRepository")
+export class UsersRepository extends Repository {
+  @autowired("RestHttpClient")
+  private readonly http!: RestHttpClient;
+
+  public deleteUser(username: string): void {
+    return this.http.delete(`/users?username=${username}`);
+  }
+}
+
+@service("UsersService")
+export class UsersService extends Service {
+  @autowired("UsersRepository")
+  private readonly repository!: UsersRepository;
+
+  @observable accessor username: string = "";
+
+  @action
+  public setUsername(username: string): void {
+    this.username = username;
+  }
+
+  public deleteUser(): void {
+    return this.repository.delete(this.username);
+  }
+}
+
+
+export function View(): JSX.Element {
+  const service = useDependency<UsersService>("UsersService");
+  return <div>Loading..<div/>;
 }
 ```
 
