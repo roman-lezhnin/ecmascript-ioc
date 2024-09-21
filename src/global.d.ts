@@ -17,7 +17,7 @@ type RegisteredComponent = ComponentSettings & {
  * Interface for objects that can have dependencies injected.
  */
 interface DependencyAware {
-  __dependencies__?: Record<string | symbol, string>;
+  __dependencies__?: Record<string | symbol, string | symbol>;
   __postConstructMethods__?: string[];
   [key: string]: Function;
 }

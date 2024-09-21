@@ -1,7 +1,12 @@
 import { Container, autowired, service, repository } from "..";
 
 describe("Container base tests", () => {
-  @repository("UserRepository")
+  const IoC = {
+    repository: Symbol.for("UserRepository"),
+    service: Symbol.for("UserService"),
+  };
+
+  @repository(IoC.repository)
   class UserRepository {
     get(): string {
       return "username";
@@ -12,9 +17,9 @@ describe("Container base tests", () => {
     }
   }
 
-  @service("UserService")
+  @service(IoC.service)
   class UserService {
-    @autowired("UserRepository")
+    @autowired(IoC.repository)
     repository!: UserRepository;
 
     getUser(): string {
@@ -37,13 +42,13 @@ describe("Container base tests", () => {
   });
 
   it("should return the same instance for singleton services", () => {
-    const userService1 = Container.get<UserService>("UserService");
-    const userService2 = Container.get<UserService>("UserService");
+    const userService1 = Container.get<UserService>(IoC.service);
+    const userService2 = Container.get<UserService>(IoC.service);
     expect(userService1).toBe(userService2);
   });
 
   it("should correctly inject dependencies", () => {
-    const userService = Container.get<UserService>("UserService");
+    const userService = Container.get<UserService>(IoC.service);
     expect(userService).toBeInstanceOf(UserService);
     expect(userService.repository).toBeInstanceOf(UserRepository);
   });

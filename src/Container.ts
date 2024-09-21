@@ -5,11 +5,11 @@ export class Container {
   /**
    * Map to store component constructors keyed by their names.
    */
-  private static components = new Map<string, RegisteredComponent>();
+  private static components = new Map<string | symbol, RegisteredComponent>();
   /**
    * Map to store singleton instances of components.
    */
-  private static instances = new Map<string, unknown>();
+  private static instances = new Map<string | symbol, unknown>();
 
   /**
    * Registers a component with the container.
@@ -18,12 +18,12 @@ export class Container {
    * @param settings - The settings of the component: whether the component should be lazy-initialized.
    */
   static register<T>(
-    name: string,
+    name: string | symbol,
     constructor: ComponentConstructor<T>,
     settings: ComponentSettings
   ): void {
     if (this.components.has(name)) {
-      throw new Error(`Component '${name}' is already registered.`);
+      throw new Error(`Component '${name.toString()}' is already registered.`);
     }
     this.components.set(name, { ...settings, constructor });
   }
@@ -33,14 +33,14 @@ export class Container {
    * @param name - The name of the component.
    * @returns The instance of the component.
    */
-  static get<T>(name: string): T {
+  static get<T>(name: string | symbol): T {
     if (this.instances.has(name)) {
       return this.instances.get(name) as T;
     }
 
     const component = this.components.get(name);
     if (!component) {
-      throw new Error(`Component '${name}' not found.`);
+      throw new Error(`Component '${name.toString()}' not found.`);
     }
 
     const instance = new component.constructor() as T;
@@ -71,7 +71,9 @@ export class Container {
       )) {
         const component = this.components.get(dependencyName);
         if (!component) {
-          throw new Error(`Component '${dependencyName}' not found.`);
+          throw new Error(
+            `Component '${dependencyName.toString()}' not found.`
+          );
         }
         if (component.lazy) {
           /**

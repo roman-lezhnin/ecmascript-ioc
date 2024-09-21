@@ -5,7 +5,7 @@ import { Container } from "../Container";
  * @param settings - The settings of the component: whether the component should be lazy-initialized.
  */
 export function component<This, Args extends any[]>(
-  name: string,
+  name: string | symbol,
   settings: ComponentSettings = { lazy: false }
 ) {
   return function (

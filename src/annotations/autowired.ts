@@ -2,7 +2,7 @@
  * Marks a property to be autowired by the DI container.
  * @param name - custom name of the dependency to inject.
  */
-export function autowired(name: string) {
+export function autowired(name: string | symbol) {
   return function decorator<This, Value>(
     target: undefined,
     context: ClassFieldDecoratorContext<This, Value>
