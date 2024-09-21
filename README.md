@@ -81,8 +81,8 @@ class UsersController {
 
 ```TypeScript
 import React from "react";
-import { observable } from "mobx";
 import { AxiosInstance } from "axios";
+import { observable, action } from "mobx";
 import { autowired, component, repository, service } from 'ecmascript-ioc';
 
 
@@ -105,6 +105,7 @@ export class UsersRepository extends Repository {
     return this.http.delete(`/users?username=${username}`);
   }
 }
+
 
 @service("UsersService")
 export class UsersService extends Service {
