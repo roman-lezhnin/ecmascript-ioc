@@ -9,13 +9,13 @@ export class Container {
   /**
    * Map to store singleton instances of components.
    */
-  private static instances = new Map<string | symbol, unknown>();
+  private static singletons = new Map<string | symbol, unknown>();
 
   /**
    * Registers a component with the container.
    * @param name - The name of the component.
    * @param constructor - The constructor function of the component.
-   * @param settings - The settings of the component: whether the component should be lazy-initialized.
+   * @param settings - The settings of the component: scope and whether the component should be lazy-initialized.
    */
   static register<T>(
     name: string | symbol,
@@ -29,34 +29,47 @@ export class Container {
   }
 
   /**
-   * Retrieves an instance of the requested component.
+   * Retrieves an instance of the requested component based on its scope.
    * @param name - The name of the component.
    * @returns The instance of the component.
    */
   static get<T>(name: string | symbol): T {
-    if (this.instances.has(name)) {
-      return this.instances.get(name) as T;
-    }
-
     const component = this.components.get(name);
     if (!component) {
       throw new Error(`Component '${name.toString()}' not found.`);
     }
 
-    const instance = new component.constructor() as T;
-    this.instances.set(name, instance);
+    if (component.scope === "Singleton") {
+      if (this.singletons.has(name)) {
+        return this.singletons.get(name) as T;
+      }
 
-    this.injectDependencies(instance as DependencyAware);
-    this.callPostConstructMethods(instance as DependencyAware);
+      const instance = new component.constructor() as T;
+      this.singletons.set(name, instance);
 
-    return instance;
+      this.injectDependencies(instance as DependencyAware);
+      this.callPostConstructMethods(instance as DependencyAware);
+
+      return instance;
+    } else if (component.scope === "Prototype") {
+      const instance = new component.constructor() as T;
+
+      this.injectDependencies(instance as DependencyAware);
+      this.callPostConstructMethods(instance as DependencyAware);
+
+      return instance;
+    } else {
+      throw new Error(
+        `Unknown scope '${component.scope}' for component '${name.toString()}'.`
+      );
+    }
   }
 
   /**
    * Remove dependencies from the instance's properties.
    */
   static clear() {
-    this.instances.clear();
+    this.singletons.clear();
   }
 
   /**

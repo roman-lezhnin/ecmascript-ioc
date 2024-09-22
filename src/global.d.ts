@@ -1,4 +1,10 @@
 /**
+ * Defines the possible scopes for a component:
+ * Singleton - one instance for Container;
+ * Prototype - one instance for access in dependency;
+ */
+type ComponentScope = "Singleton" | "Prototype";
+/**
  * Represents a constructor for a component.
  */
 type ComponentConstructor<T> = new () => T;
@@ -8,6 +14,7 @@ type ComponentConstructor<T> = new () => T;
  */
 type ComponentSettings = {
   lazy: boolean;
+  scope: ComponentScope;
 };
 type RegisteredComponent = ComponentSettings & {
   constructor: ComponentConstructor<unknown>;

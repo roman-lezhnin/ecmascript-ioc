@@ -5,7 +5,7 @@ You can use it anywhere: Node.js backend, Electron.js, IoT apps, React/ReactNati
 
 ## Features
 
-- **Dependency Injection**: Automatic dependency resolution and injection with circular dependencies handling and lazy initializations.
+- **Dependency Injection**: Automatic dependency resolution and injection with scopes, circular dependencies handling and lazy initializations.
 - **Annotations**: Use decorators like `@component`, `@repository`, `@service`, `@controller`, and `@autowired`.
 - **New ECMAScript Decorators**: Use the native TypeScript5.0 decorators without `reflect-metadata`.
 
@@ -13,6 +13,26 @@ You can use it anywhere: Node.js backend, Electron.js, IoT apps, React/ReactNati
 
 ```bash
 npm install ecmascript-ioc
+```
+
+## Component settings
+
+All dependency definition decorators have a common signature: you define the required component name and optional settings.
+
+```TypeScript
+type ComponentSettings = {
+  lazy: boolean;
+  scope: "Singleton" | "Prototype";
+};
+
+function component(name: string | symbol, settings?: Partial<ComponentSettings>);
+```
+
+```TypeScript
+const defaultSettings: ComponentSettings = {
+  lazy: false,
+  scope: "Singleton";
+};
 ```
 
 ## Usage guides
@@ -30,7 +50,7 @@ import { autowired,
 
 @component(ReportGenerator.di_token, { lazy: true })
 class ReportGenerator {
-  public static readonly di_token: symbol = Symbol.for("ReportGenerator");
+  static readonly di_token = Symbol.for("ReportGenerator");
 
   public generateTaxReport(username: string): void {
     console.log(`Prepare tax report for user: ${username}.`);
@@ -107,7 +127,7 @@ export class UsersRepository extends Repository {
 }
 
 
-@service("UsersService")
+@service("UsersService", { scope: 'Prototype' })
 export class UsersService extends Service {
   @autowired("UsersRepository")
   private readonly repository!: UsersRepository;
