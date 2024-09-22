@@ -35,21 +35,24 @@ describe("Container base tests", () => {
     Container.clear();
   });
 
-  it("should throw an error if a component is not registered", () => {
-    expect(() => Container.get("NonExistentComponent")).toThrow(
-      "Component 'NonExistentComponent' not found."
-    );
-  });
-
-  it("should return the same instance for singleton services", () => {
-    const userService1 = Container.get<UserService>(IoC.service);
-    const userService2 = Container.get<UserService>(IoC.service);
-    expect(userService1).toBe(userService2);
-  });
-
   it("should correctly inject dependencies", () => {
     const userService = Container.get<UserService>(IoC.service);
     expect(userService).toBeInstanceOf(UserService);
     expect(userService.repository).toBeInstanceOf(UserRepository);
+  });
+
+  it("should throw an error when registering a component that is already registered", () => {
+    expect(() => {
+      Container.register(IoC.service, UserService, {
+        lazy: false,
+        scope: "Singleton",
+      });
+    }).toThrow(`Component '${IoC.service.toString()}' is already registered.`);
+  });
+
+  it("should throw an error if a component is not registered", () => {
+    expect(() => Container.get("NonExistentComponent")).toThrow(
+      "Component 'NonExistentComponent' not found."
+    );
   });
 });

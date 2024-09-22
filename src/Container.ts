@@ -22,6 +22,7 @@ export class Container {
     constructor: ComponentConstructor<T>,
     settings: ComponentSettings
   ): void {
+    this.validateSettings(name.toString(), settings);
     if (this.components.has(name)) {
       throw new Error(`Component '${name.toString()}' is already registered.`);
     }
@@ -130,6 +131,18 @@ export class Container {
           instance[methodName].call(instance);
         }
       }
+    }
+  }
+
+  private static validateSettings(
+    name: string,
+    { lazy, scope }: ComponentSettings
+  ): void {
+    if (typeof lazy !== "boolean") {
+      throw new Error(`Unknown lazy-init mode for component '${name}'.`);
+    }
+    if (scope !== "Singleton" && scope !== "Prototype") {
+      throw new Error(`Unknown scope '${scope}' for component '${name}'.`);
     }
   }
 }
