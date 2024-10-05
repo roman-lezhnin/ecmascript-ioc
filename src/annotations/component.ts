@@ -1,4 +1,4 @@
-import { Container } from "../Container";
+import { DiContainer } from "../DiContainer";
 /**
  * Marks a class as a component and registers it with the DI container.
  * @param name - custom name for the dependency.
@@ -7,26 +7,26 @@ import { Container } from "../Container";
  */
 export function component<This, Args extends unknown[]>(
   name: string | symbol,
-  settings?: Partial<ComponentSettings>
+  settings?: Partial<DependencySettings>
 ) {
   return function (target: new (...args: Args) => This): void {
     if (!name) {
       throw new Error(`Empty component name`);
     }
-    const componentSettings: ComponentSettings = {
+    const dependencySettings: DependencySettings = {
       lazy: false,
       scope: "Singleton",
     };
     if (typeof settings?.lazy === "boolean") {
-      componentSettings.lazy = settings.lazy;
+      dependencySettings.lazy = settings.lazy;
     }
     if (settings?.scope) {
-      componentSettings.scope = settings.scope;
+      dependencySettings.scope = settings.scope;
     }
-    Container.register(
+    DiContainer.registerDependency(
       name,
-      target as ComponentConstructor<unknown>,
-      Object.seal(componentSettings)
+      target as DependencyConstructor<unknown>,
+      Object.freeze(dependencySettings)
     );
   };
 }

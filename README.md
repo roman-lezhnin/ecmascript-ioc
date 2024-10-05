@@ -15,21 +15,21 @@ You can use it anywhere: Node.js backend, Electron.js, IoT apps, React/ReactNati
 npm install ecmascript-ioc
 ```
 
-## Component settings
+## Dependency settings
 
-All dependency definition decorators have a common signature: you define the required component name and optional settings.
+All dependency definition decorators have a common signature: you define the required dependency name and optional settings.
 
 ```TypeScript
-type ComponentSettings = {
+type DependencySettings = {
   lazy: boolean;
   scope: "Singleton" | "Prototype";
 };
 
-function component(name: string | symbol, settings?: Partial<ComponentSettings>);
+function component(name: string | symbol, settings?: Partial<DependencySettings>);
 ```
 
 ```TypeScript
-const defaultSettings: ComponentSettings = {
+const defaultSettings: DependencySettings = {
   lazy: false,
   scope: "Singleton";
 };
