@@ -1,6 +1,6 @@
 {
   "name": "ecmascript-ioc",
-  "version": "0.3.6",
+  "version": "0.3.7",
   "description": "IoC library mirroring Java Spring Framework's implementation",
   "author": "Roman Lezhnin <romalezhnin@gmail.com>",
   "license": "MIT",
@@ -24,7 +24,7 @@
     "decorators"
   ],
   "scripts": {
-    "build": "rm -fr dist/* && tsc -p tsconfig.json && tsc -p tsconfig-cjs.json && bash ./fixup",
+    "build": "webpack",
     "prepare": "npm run build",
     "test": "jest",
     "docs": "typedoc src",
@@ -32,14 +32,14 @@
     "lint": "eslint src",
     "lint-fix": "eslint src --fix"
   },
-  "main": "dist/cjs/index.js",
-  "module": "dist/mjs/index.js",
-  "types": "dist/mjs/index.d.ts",
+  "main": "dist/ecmascript-ioc.cjs.js",
+  "module": "dist/ecmascript-ioc.esm.js",
+  "types": "dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/mjs/index.js",
-      "require": "./dist/cjs/index.js",
-      "types": "./dist/mjs/index.d.ts"
+      "import": "./dist/ecmascript-ioc.esm.js",
+      "require": "./dist/ecmascript-ioc.cjs.js",
+      "types": "./dist/index.d.ts"
     }
   },
   "files": [
@@ -53,9 +53,12 @@
     "jest": "^29.2.0",
     "prettier": "^2.8.8",
     "ts-jest": "^29.0.3",
+    "ts-loader": "^9.5.1",
     "ts-mockito": "^2.6.1",
     "typedoc": "^0.26.7",
     "typescript": "^5.0.0",
-    "typescript-eslint": "^8.6.0"
+    "typescript-eslint": "^8.6.0",
+    "webpack": "^5.95.0",
+    "webpack-cli": "^5.1.4"
   }
 }
