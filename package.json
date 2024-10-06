@@ -1,6 +1,6 @@
 {
   "name": "ecmascript-ioc",
-  "version": "0.3.5",
+  "version": "0.3.6",
   "description": "IoC library mirroring Java Spring Framework's implementation",
   "author": "Roman Lezhnin <romalezhnin@gmail.com>",
   "license": "MIT",

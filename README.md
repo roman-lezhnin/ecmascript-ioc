@@ -42,8 +42,39 @@ const defaultSettings: DependencySettings = {
 ```TypeScript
 import { ApplicationContext } from 'ecmascript-ioc';
 
-const applicationContext = new ApplicationContext({...configurationProperties});
+const applicationContext = new ApplicationContext({...configuration});
 applicationContext.init();
+```
+
+#### In the test env:
+
+```TypeScript
+import { TestApplicationContext } from 'ecmascript-ioc';
+
+describe('TestCases', () => {
+  const applicationContext = new TestApplicationContext();
+  applicationContext.init();
+
+  beforeEach(() => {
+    context.diContainer.clear();
+  });
+});
+```
+
+```TypeScript
+import { TestApplicationContext } from 'ecmascript-ioc';
+
+describe('TestCases', () => {
+  const applicationContext = new TestApplicationContext();
+  applicationContext.init();
+
+  it('TestCase', () => {
+    context.diContainer.overrideDependency("name", Clazz, {
+      lazy: false,
+      scope: "Singleton",
+    });
+  });
+});
 ```
 
 ### Backend Three-tier architecture example:
@@ -168,7 +199,10 @@ import { Container } from "ecmascript-ioc";
 
 export function useDependency<T>(dependencyName: string | symbol): T {
   return useMemo(() => {
-    return Container.get<T>(dependencyName);
+    return globalThis
+    .ecmascript_ioc_application_context
+    .diContainer
+    .getDependency<T>(dependencyName);
   }, [dependencyName]);
 }
 ```

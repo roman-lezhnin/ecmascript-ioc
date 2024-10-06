@@ -21,9 +21,6 @@ export class ApplicationContext {
     return this.#configurationProperties;
   }
 
-  /**
-   * Marks a class as a component and registers it with the DI container.
-   */
   init(): void {
     Object.defineProperty(globalThis, "ecmascript_ioc_application_context", {
       value: Object.freeze(this),
