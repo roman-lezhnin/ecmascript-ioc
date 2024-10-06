@@ -78,9 +78,6 @@ describe("Container @postConstruct tests", () => {
       }
     }
 
-    // LazyComponent should not be instantiated until accessed
-    // expect(Container["singletons"].has("LazyComponent")).toBe(false);
-
     const instance =
       context.diContainer.getDependency<LazyComponent>("LazyComponent");
     expect(instance.initialized).toBe(true);

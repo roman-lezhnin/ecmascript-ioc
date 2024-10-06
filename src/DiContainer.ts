@@ -66,9 +66,7 @@ export class DiContainer {
    */
   getDependency = <T>(name: string | symbol): T => {
     if (this.currentlyResolving.has(name)) {
-      throw new Error(
-        `Circular dependency detected for component '${name.toString()}'.`
-      );
+      throw new Error(`Circular dependency detected for '${name.toString()}'.`);
     }
 
     const dependency = this.dependencies.get(name);
