@@ -1,6 +1,13 @@
-import { DiContainer, autowired, component } from "..";
+import { TestApplicationContext, autowired, component } from "..";
 
 describe("Container scope tests", () => {
+  const context = new TestApplicationContext();
+  context.init();
+
+  beforeEach(() => {
+    context.diContainer.clear();
+  });
+
   @component("SingletonService")
   class SingletonService {
     main() {
@@ -30,40 +37,36 @@ describe("Container scope tests", () => {
     }
   }
 
-  beforeEach(() => {
-    DiContainer.clear();
-  });
-
   it("should register a singleton component successfully", () => {
     const component =
-      DiContainer.getDependency<SingletonService>("SingletonService");
+      context.diContainer.getDependency<SingletonService>("SingletonService");
     expect(component).toBeDefined();
     expect(component.constructor).toBe(SingletonService);
   });
 
   it("should register a prototype component successfully", () => {
     const component =
-      DiContainer.getDependency<PrototypeService>("PrototypeService");
+      context.diContainer.getDependency<PrototypeService>("PrototypeService");
     expect(component).toBeDefined();
     expect(component.constructor).toBe(PrototypeService);
   });
 
   it("should inject singleton dependencies correctly", () => {
     const dependent =
-      DiContainer.getDependency<DependentService>("DependentService");
+      context.diContainer.getDependency<DependentService>("DependentService");
     expect(dependent.singletonService).toBeInstanceOf(SingletonService);
 
     const singleton1 =
-      DiContainer.getDependency<SingletonService>("SingletonService");
+      context.diContainer.getDependency<SingletonService>("SingletonService");
     const singleton2 = dependent.singletonService;
     expect(singleton1).toBe(singleton2);
   });
 
   it("should inject prototype dependencies correctly", () => {
     const dependent1 =
-      DiContainer.getDependency<DependentService>("DependentService");
+      context.diContainer.getDependency<DependentService>("DependentService");
     const dependent2 =
-      DiContainer.getDependency<DependentService>("DependentService");
+      context.diContainer.getDependency<DependentService>("DependentService");
 
     expect(dependent1.prototypeService).toBeInstanceOf(PrototypeService);
     expect(dependent2.prototypeService).toBeInstanceOf(PrototypeService);
@@ -72,17 +75,17 @@ describe("Container scope tests", () => {
 
   it("should return the same instance for singleton components", () => {
     const instance1 =
-      DiContainer.getDependency<SingletonService>("SingletonService");
+      context.diContainer.getDependency<SingletonService>("SingletonService");
     const instance2 =
-      DiContainer.getDependency<SingletonService>("SingletonService");
+      context.diContainer.getDependency<SingletonService>("SingletonService");
     expect(instance1).toBe(instance2);
   });
 
   it("should return different instances for prototype components", () => {
     const instance1 =
-      DiContainer.getDependency<PrototypeService>("PrototypeService");
+      context.diContainer.getDependency<PrototypeService>("PrototypeService");
     const instance2 =
-      DiContainer.getDependency<PrototypeService>("PrototypeService");
+      context.diContainer.getDependency<PrototypeService>("PrototypeService");
     expect(instance1).not.toBe(instance2);
   });
 
@@ -96,9 +99,10 @@ describe("Container scope tests", () => {
       dependency2!: PrototypeService;
     }
 
-    const instance = DiContainer.getDependency<MultiPrototypeDependentService>(
-      "MultiPrototypeDependentService"
-    );
+    const instance =
+      context.diContainer.getDependency<MultiPrototypeDependentService>(
+        "MultiPrototypeDependentService"
+      );
     expect(instance.dependency1).toBeInstanceOf(PrototypeService);
     expect(instance.dependency2).toBeInstanceOf(PrototypeService);
     expect(instance.dependency1).not.toBe(instance.dependency2);
@@ -106,7 +110,7 @@ describe("Container scope tests", () => {
 
   it("should throw an error when registering a component with an invalid scope", () => {
     expect(() => {
-      DiContainer.registerDependency(
+      context.diContainer.registerDependency(
         "InvalidScopeService",
         InvalidScopeService,
         {

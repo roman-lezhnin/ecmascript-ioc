@@ -6,14 +6,14 @@ export class DiContainer {
   /**
    * Map to store dependencies constructors keyed by their names.
    */
-  private static readonly dependencies = new Map<
+  private readonly dependencies = new Map<
     string | symbol,
     RegisteredDependency
   >();
   /**
    * Map to store dependencies scope handlers.
    */
-  private static readonly scopeHandlers = new Map<
+  private readonly scopeHandlers = new Map<
     DependencyScope,
     DependencyScopeHandler
   >([
@@ -23,7 +23,7 @@ export class DiContainer {
   /**
    * Set to track currently resolving dependencies (for circular detection)
    */
-  private static readonly currentlyResolving = new Set<string | symbol>();
+  private readonly currentlyResolving = new Set<string | symbol>();
 
   /**
    * Registers a dependency with the container.
@@ -31,12 +31,12 @@ export class DiContainer {
    * @param constructor - The constructor function of the dependency.
    * @param settings - The settings of the dependency: scope and whether the dependency should be lazy-initialized.
    */
-  static registerDependency<T>(
+  registerDependency<T>(
     name: string | symbol,
     constructor: DependencyConstructor<T>,
     settings: DependencySettings
   ): void {
-    this.validateSettings(name.toString(), settings);
+    DiContainer.validateSettings(name.toString(), settings);
     if (this.dependencies.has(name)) {
       throw new Error(`Dependency '${name.toString()}' is already registered.`);
     }
@@ -50,12 +50,12 @@ export class DiContainer {
    * @param constructor - The constructor function of the dependency.
    * @param settings - The settings of the dependency: scope and whether the dependency should be lazy-initialized.
    */
-  static overrideDependency<T>(
+  overrideDependency<T>(
     name: string | symbol,
     constructor: DependencyConstructor<T>,
     settings: DependencySettings
   ): void {
-    this.validateSettings(name.toString(), settings);
+    DiContainer.validateSettings(name.toString(), settings);
     this.dependencies.set(name, { ...settings, constructor });
   }
 
@@ -64,7 +64,7 @@ export class DiContainer {
    * @param name - The name of the dependency.
    * @returns The instance of the dependency.
    */
-  static getDependency<T>(name: string | symbol): T {
+  getDependency = <T>(name: string | symbol): T => {
     if (this.currentlyResolving.has(name)) {
       throw new Error(
         `Circular dependency detected for component '${name.toString()}'.`
@@ -92,18 +92,18 @@ export class DiContainer {
         dependency.constructor as DependencyConstructor<T>
       );
       this.injectDependencies(instance as DependencyAware);
-      this.callPostConstructMethods(instance as DependencyAware);
+      DiContainer.callPostConstructMethods(instance as DependencyAware);
 
       return instance;
     } finally {
       this.currentlyResolving.delete(name);
     }
-  }
+  };
 
   /**
    * Remove dependencies from the instance's properties.
    */
-  static clear() {
+  clear() {
     this.scopeHandlers.set("Singleton", new SingletonScopeHandler());
   }
 
@@ -111,7 +111,8 @@ export class DiContainer {
    * Injects dependencies into the instance's properties.
    * @param instance - The instance to inject dependencies into.
    */
-  private static injectDependencies(instance: DependencyAware): void {
+  private injectDependencies(instance: DependencyAware): void {
+    const { getDependency } = this;
     const dependencies = instance.__dependencies__;
     if (dependencies) {
       for (const [contextName, dependencyName] of Object.entries(
@@ -133,7 +134,7 @@ export class DiContainer {
             configurable: true,
             enumerable: true,
             get: function () {
-              const value = DiContainer.getDependency(dependencyName);
+              const value = getDependency(dependencyName);
               // Cache the resolved dependency
               Object.defineProperty(this, contextName, {
                 value,
@@ -146,7 +147,7 @@ export class DiContainer {
           });
         } else {
           // Eagerly Initialization:
-          const value = DiContainer.getDependency(dependencyName);
+          const value = getDependency(dependencyName);
           (instance as Record<string | symbol, unknown>)[contextName] = value;
         }
       }

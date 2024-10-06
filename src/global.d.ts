@@ -1,4 +1,11 @@
 /**
+ * Represents an ApplicationContext configuration properties.
+ */
+type ConfigurationProperties = Record<
+  string,
+  object | string | number | boolean
+>;
+/**
  * Defines the possible scopes for a dependency:
  * Singleton - one instance for Container;
  * Prototype - one instance for access in dependency;

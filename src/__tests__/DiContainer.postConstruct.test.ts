@@ -1,8 +1,16 @@
-import { DiContainer, autowired, component, postConstruct } from "..";
+import {
+  TestApplicationContext,
+  autowired,
+  component,
+  postConstruct,
+} from "..";
 
 describe("Container @postConstruct tests", () => {
+  const context = new TestApplicationContext();
+  context.init();
+
   beforeEach(() => {
-    DiContainer.clear();
+    context.diContainer.clear();
   });
 
   it("should call @postConstruct methods after dependencies are injected", () => {
@@ -25,7 +33,7 @@ describe("Container @postConstruct tests", () => {
     }
 
     const testInstance =
-      DiContainer.getDependency<TestComponent>("TestComponent");
+      context.diContainer.getDependency<TestComponent>("TestComponent");
 
     // Verify that the postConstruct method was called
     expect(testInstance.initialized).toBe(true);
@@ -51,9 +59,10 @@ describe("Container @postConstruct tests", () => {
       }
     }
 
-    const instance = DiContainer.getDependency<MultiPostConstructComponent>(
-      "MultiPostConstructComponent"
-    );
+    const instance =
+      context.diContainer.getDependency<MultiPostConstructComponent>(
+        "MultiPostConstructComponent"
+      );
 
     expect(instance.initializedSteps).toEqual(["first", "second"]);
   });
@@ -72,7 +81,8 @@ describe("Container @postConstruct tests", () => {
     // LazyComponent should not be instantiated until accessed
     // expect(Container["singletons"].has("LazyComponent")).toBe(false);
 
-    const instance = DiContainer.getDependency<LazyComponent>("LazyComponent");
+    const instance =
+      context.diContainer.getDependency<LazyComponent>("LazyComponent");
     expect(instance.initialized).toBe(true);
   });
 
@@ -95,7 +105,7 @@ describe("Container @postConstruct tests", () => {
       value = 100;
     }
 
-    const instance = DiContainer.getDependency<DependentComponent2>(
+    const instance = context.diContainer.getDependency<DependentComponent2>(
       "DependentComponent2"
     );
     expect(instance.dependencyValue).toBe(100);
@@ -128,7 +138,7 @@ describe("Container @postConstruct tests", () => {
   //     }
   //   }
 
-  //   const circular3 = Container.getDependency<Circular3>("Circular3");
+  //   const circular3 = container.getDependency<Circular3>("Circular3");
   //   expect(circular3.initialized).toBe(true);
   //   expect(circular3.circular4.initialized).toBe(true);
   //   expect(circular3.circular4.circular1).toBe(circular3);

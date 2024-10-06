@@ -1,6 +1,13 @@
-import { DiContainer, autowired, service, repository } from "..";
+import { TestApplicationContext, autowired, service, repository } from "..";
 
 describe("Container base tests", () => {
+  const context = new TestApplicationContext();
+  context.init();
+
+  beforeEach(() => {
+    context.diContainer.clear();
+  });
+
   const IoC = {
     repository: Symbol.for("UserRepository"),
     service: Symbol.for("UserService"),
@@ -31,12 +38,10 @@ describe("Container base tests", () => {
     }
   }
 
-  beforeEach(() => {
-    DiContainer.clear();
-  });
-
   it("should correctly inject dependencies", () => {
-    const userService = DiContainer.getDependency<UserService>(IoC.service);
+    const userService = context.diContainer.getDependency<UserService>(
+      IoC.service
+    );
     expect(userService).toBeInstanceOf(UserService);
     expect(userService.repository).toBeInstanceOf(UserRepository);
   });
@@ -55,23 +60,25 @@ describe("Container base tests", () => {
       }
     }
 
-    const userService = DiContainer.getDependency<UserService>(IoC.service);
+    const userService = context.diContainer.getDependency<UserService>(
+      IoC.service
+    );
     expect(userService).toBeInstanceOf(UserService);
     expect(userService.repository).toBeInstanceOf(UserRepository);
 
-    DiContainer.overrideDependency(IoC.service, OverridedUserService, {
+    context.diContainer.overrideDependency(IoC.service, OverridedUserService, {
       lazy: false,
       scope: "Singleton",
     });
     const overridedUserService =
-      DiContainer.getDependency<OverridedUserService>(IoC.service);
+      context.diContainer.getDependency<OverridedUserService>(IoC.service);
     expect(overridedUserService).toBeInstanceOf(OverridedUserService);
     expect(overridedUserService.repository).toBeInstanceOf(UserRepository);
   });
 
   it("should throw an error when registering a component that is already registered", () => {
     expect(() => {
-      DiContainer.registerDependency(IoC.service, UserService, {
+      context.diContainer.registerDependency(IoC.service, UserService, {
         lazy: false,
         scope: "Singleton",
       });
@@ -79,8 +86,8 @@ describe("Container base tests", () => {
   });
 
   it("should throw an error if a component is not registered", () => {
-    expect(() => DiContainer.getDependency("NonExistentComponent")).toThrow(
-      "Dependency 'NonExistentComponent' not found."
-    );
+    expect(() =>
+      context.diContainer.getDependency("NonExistentComponent")
+    ).toThrow("Dependency 'NonExistentComponent' not found.");
   });
 });

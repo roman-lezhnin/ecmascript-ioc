@@ -1,4 +1,4 @@
-export * from "./DiContainer";
+export * from "./ApplicationContext";
 export * from "./annotations/autowired";
 export * from "./annotations/component";
 export * from "./annotations/repository";

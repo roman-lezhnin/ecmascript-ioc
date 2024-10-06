@@ -37,6 +37,15 @@ const defaultSettings: DependencySettings = {
 
 ## Usage guides
 
+### Create and init ApplicationContext before usage:
+
+```TypeScript
+import { ApplicationContext } from 'ecmascript-ioc';
+
+const applicationContext = new ApplicationContext({...configurationProperties});
+applicationContext.init();
+```
+
 ### Backend Three-tier architecture example:
 
 ```TypeScript

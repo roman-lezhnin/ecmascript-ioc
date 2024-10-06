@@ -1,4 +1,3 @@
-import { DiContainer } from "../DiContainer";
 /**
  * Marks a class as a component and registers it with the DI container.
  * @param name - custom name for the dependency.
@@ -11,7 +10,7 @@ export function component<This, Args extends unknown[]>(
 ) {
   return function (target: new (...args: Args) => This): void {
     if (!name) {
-      throw new Error(`Empty component name`);
+      throw new Error(`Empty dependency name`);
     }
     const dependencySettings: DependencySettings = {
       lazy: false,
@@ -23,7 +22,7 @@ export function component<This, Args extends unknown[]>(
     if (settings?.scope) {
       dependencySettings.scope = settings.scope;
     }
-    DiContainer.registerDependency(
+    globalThis.ecmascript_ioc_application_context.diContainer.registerDependency(
       name,
       target as DependencyConstructor<unknown>,
       Object.freeze(dependencySettings)
